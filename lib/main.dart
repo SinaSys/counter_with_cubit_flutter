@@ -39,8 +39,26 @@ class MyHomePage extends StatelessWidget {
               Text("You have pushed the button many times : "),
               BlocBuilder<CounterCubit, CounterState>(
                   builder: (context, state) {
-                return Text(state.counterValue.toString(),
-                    style: Theme.of(context).textTheme.headline4);
+                if (state.counterValue < 0) {
+                  return Text(
+                    'BRR, NEGATIVE ' + state.counterValue.toString(),
+                    style: Theme.of(context).textTheme.headline4,
+                  );
+                } else if (state.counterValue % 2 == 0) {
+                  return Text(
+                    'YAAAY ' + state.counterValue.toString(),
+                    style: Theme.of(context).textTheme.headline4,
+                  );
+                } else if (state.counterValue == 5) {
+                  return Text(
+                    'HMM, NUMBER 5',
+                    style: Theme.of(context).textTheme.headline4,
+                  );
+                } else
+                  return Text(
+                    state.counterValue.toString(),
+                    style: Theme.of(context).textTheme.headline4,
+                  );
               }),
               SizedBox(height: 24),
               Row(
