@@ -1,106 +1,80 @@
-import 'package:counter_with_cubit_flutter/cubit/counter_cubit.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:counter_with_cubit_flutter/logic/cubit/internet_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'cubit/counter_cubit.dart';
-import 'package:counter_with_cubit_flutter/cubit/counter_state.dart';
+import 'constants/enum.dart';
+import 'logic/cubit/counter_cubit.dart';
+import 'logic/cubit/internet_cubit.dart';
+import 'logic/cubit/internet_state.dart';
+import 'logic/cubit/counter_state.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(MyApp(
+    connectivity: Connectivity(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
+  final Connectivity connectivity;
+
+  const MyApp({
+    Key key,
+    @required this.connectivity,
+  }) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: BlocProvider<CounterCubit>(
-        create: (context) => CounterCubit(),
-        child: MyHomePage(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<InternetCubit>(
+          create: (context) => InternetCubit(connectivity: connectivity),
+        ),
+        BlocProvider<CounterCubit>(
+          create: (context) =>
+              CounterCubit(internetCubit: context.bloc<InternetCubit>()),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: MyHomePage(),
       ),
     );
   }
 }
-
 
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Bloc Consumer"),
+        title: Text("BlocListener in Bloc To Bloc Communication"),
       ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text('You have pushed the button this many times:',),
-            BlocConsumer<CounterCubit, CounterState>(
-              listener: (context, state) {
-                if (state.wasIncremented == true) {
-                  Scaffold.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Incremented!'),
-                      duration: Duration(milliseconds: 300),
-                    ),
-                  );
-                } else if (state.wasIncremented == false) {
-                  Scaffold.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Decremented!'),
-                      duration: Duration(milliseconds: 300),
-                    ),
-                  );
-                }
-              },
+            BlocBuilder<InternetCubit, InternetState>(
               builder: (context, state) {
-                if (state.counterValue < 0) {
-                  return Text(
-                    'BRR, NEGATIVE ' + state.counterValue.toString(),
-                    style: Theme.of(context).textTheme.headline4,
-                  );
-                } else if (state.counterValue % 2 == 0) {
-                  return Text(
-                    'YAAAY ' + state.counterValue.toString(),
-                    style: Theme.of(context).textTheme.headline4,
-                  );
-                } else if (state.counterValue == 5) {
-                  return Text(
-                    'HMM, NUMBER 5',
-                    style: Theme.of(context).textTheme.headline4,
-                  );
-                } else
-                  return Text(
-                    state.counterValue.toString(),
-                    style: Theme.of(context).textTheme.headline4,
-                  );
+                if (state is InternetConnected &&
+                    state.connectionType == ConnectionType.Wifi) {
+                  return Text('Wi-Fi',style: Theme.of(context).textTheme.headline4,);
+                } else if (state is InternetConnected &&
+                    state.connectionType == ConnectionType.Mobile) {
+                  return Text('Mobile',style: Theme.of(context).textTheme.headline4,);
+                } else if (state is InternetDisconnected) {
+                  return Text('Disconnected',style: Theme.of(context).textTheme.headline4,);
+                }
+                return CircularProgressIndicator();
               },
             ),
-            SizedBox(
-              height: 24,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                FloatingActionButton(
-                  onPressed: () {
-                    BlocProvider.of<CounterCubit>(context).decrement();
-                    // context.bloc<CounterCubit>().decrement();
-                  },
-                  child: Icon(Icons.remove),
-                ),
-                FloatingActionButton(
-                  onPressed: () {
-                    // BlocProvider.of<CounterCubit>(context).increment();
-                    context.bloc<CounterCubit>().increment();
-                  },
-                  child: Icon(Icons.add),
-                ),
-              ],
-            ),
+            SizedBox(height: 4,),
+            BlocBuilder<CounterCubit, CounterState>(builder: (context, state) {
+              return Text(state.counterValue.toString(),style: Theme.of(context).textTheme.headline2,);
+            })
           ],
         ),
       ),
