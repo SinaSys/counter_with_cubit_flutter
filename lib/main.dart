@@ -59,23 +59,59 @@ class MyHomePage extends StatelessWidget {
           children: <Widget>[
             BlocBuilder<InternetCubit, InternetState>(
               builder: (context, state) {
-                if (state is InternetConnected && state.connectionType == ConnectionType.Wifi) {
-                  return Text('Wi-Fi',style: Theme.of(context).textTheme.headline4,);
-                } else if (state is InternetConnected && state.connectionType == ConnectionType.Mobile) {
-                  return Text('Mobile',style: Theme.of(context).textTheme.headline4,);
+                if (state is InternetConnected &&
+                    state.connectionType == ConnectionType.Wifi) {
+                  return Text('Wi-Fi', style: Theme.of(context).textTheme.headline4,);
+                } else if (state is InternetConnected &&
+                    state.connectionType == ConnectionType.Mobile) {
+                  return Text('Mobile', style: Theme.of(context).textTheme.headline4,
+                  );
                 } else if (state is InternetDisconnected) {
-                  return Text('Disconnected',style: Theme.of(context).textTheme.headline4,);
+                  return Text('Disconnected', style: Theme.of(context).textTheme.headline4,);
                 }
                 return CircularProgressIndicator();
               },
             ),
             SizedBox(height: 4,),
-            BlocBuilder<CounterCubit, CounterState>(builder: (context, state) {
-              return Text(state.counterValue.toString(),style: Theme.of(context).textTheme.headline2,);
-            })
-          ],
-        ),
-      ),
-    );
-  }
+            BlocConsumer<CounterCubit, CounterState>(
+              listener: (context, state) {
+                if (state.wasIncremented == true) {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Incremented!'),
+                      duration: Duration(milliseconds: 300),
+                    ),
+                  );
+                } else if (state.wasIncremented == false) {
+                  Scaffold.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Decremented!'),
+                      duration: Duration(milliseconds: 300),
+                    ),);}
+              },
+              builder: (context, state) {
+                return Text(state.counterValue.toString(),
+                  style: Theme.of(context).textTheme.headline4,);
+              },
+            ),
+            SizedBox(height: 24,),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                FloatingActionButton(
+                  onPressed: () {
+                    BlocProvider.of<CounterCubit>(context).decrement();
+                    // context.bloc<CounterCubit>().decrement();
+                  },
+                  tooltip: 'Decrement',
+                  child: Icon(Icons.remove),
+                ),
+                FloatingActionButton(
+                  onPressed: () {
+                    // BlocProvider.of<CounterCubit>(context).increment();
+                    context.bloc<CounterCubit>().increment();
+                  },
+                  tooltip: 'Increment',
+                  child: Icon(Icons.add),
+                ),],),],),),);}
 }
