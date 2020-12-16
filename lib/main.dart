@@ -53,25 +53,13 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         title: Text("BlocListener in Bloc To Bloc Communication"),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            BlocBuilder<InternetCubit, InternetState>(
-              builder: (context, state) {
-                if (state is InternetConnected && state.connectionType == ConnectionType.Wifi) {
-                  return Text('Wi-Fi',style: Theme.of(context).textTheme.headline4,);
-                } else if (state is InternetConnected && state.connectionType == ConnectionType.Mobile) {
-                  return Text('Mobile',style: Theme.of(context).textTheme.headline4,);
-                } else if (state is InternetDisconnected) {
-                  return Text('Disconnected',style: Theme.of(context).textTheme.headline4,);
-                }
-                return CircularProgressIndicator();
-              },
-            ),
-          ],
-        ),
-      ),
+      body: Center(child:
+          BlocBuilder<CounterCubit, CounterState>(builder: (context, state) {
+        return Text(
+          state.counterValue.toString(),
+          style: Theme.of(context).textTheme.headline2,
+        );
+      })),
     );
   }
 }
