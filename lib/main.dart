@@ -50,6 +50,9 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text("BlocListener in Bloc To Bloc Communication"),
+      ),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -61,6 +64,18 @@ class MyHomePage extends StatelessWidget {
                 } else if (state is InternetConnected && state.connectionType == ConnectionType.Mobile) {
                   return Text('Mobile',style: Theme.of(context).textTheme.headline4,);
                 } else if (state is InternetDisconnected) {
-                  return Text('Disconnected',style: Theme.of(context).textTheme.headline4,);}
-                return CircularProgressIndicator();},),],),),);}
+                  return Text('Disconnected',style: Theme.of(context).textTheme.headline4,);
+                }
+                return CircularProgressIndicator();
+              },
+            ),
+            SizedBox(height: 4,),
+            BlocBuilder<CounterCubit, CounterState>(builder: (context, state) {
+              return Text(state.counterValue.toString(),style: Theme.of(context).textTheme.headline2,);
+            })
+          ],
+        ),
+      ),
+    );
+  }
 }
