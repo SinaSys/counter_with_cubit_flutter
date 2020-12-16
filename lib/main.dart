@@ -30,8 +30,7 @@ class MyApp extends StatelessWidget {
           create: (context) => InternetCubit(connectivity: connectivity),
         ),
         BlocProvider<CounterCubit>(
-          create: (context) =>
-              CounterCubit(internetCubit: context.bloc<InternetCubit>()),
+          create: (context) => CounterCubit(),
         ),
       ],
       child: MaterialApp(
@@ -49,33 +48,107 @@ class MyApp extends StatelessWidget {
 class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("BlocListener in Bloc To Bloc Communication"),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            BlocBuilder<InternetCubit, InternetState>(
-              builder: (context, state) {
-                if (state is InternetConnected &&
-                    state.connectionType == ConnectionType.Wifi) {
-                  return Text('Wi-Fi',style: Theme.of(context).textTheme.headline4,);
-                } else if (state is InternetConnected &&
-                    state.connectionType == ConnectionType.Mobile) {
-                  return Text('Mobile',style: Theme.of(context).textTheme.headline4,);
-                } else if (state is InternetDisconnected) {
-                  return Text('Disconnected',style: Theme.of(context).textTheme.headline4,);
-                }
-                return CircularProgressIndicator();
-              },
-            ),
-            SizedBox(height: 4,),
-            BlocBuilder<CounterCubit, CounterState>(builder: (context, state) {
-              return Text(state.counterValue.toString(),style: Theme.of(context).textTheme.headline2,);
-            })
-          ],
+    return BlocListener<InternetCubit, InternetState>(
+      listener: (context, state) {
+        if (state is InternetConnected &&
+            state.connectionType == ConnectionType.Wifi) {
+          context.bloc<CounterCubit>().increment();
+        } else if (state is InternetConnected &&
+            state.connectionType == ConnectionType.Mobile) {
+          context.bloc<CounterCubit>().decrement();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(""),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              BlocBuilder<InternetCubit, InternetState>(
+                builder: (context, state) {
+                  if (state is InternetConnected &&
+                      state.connectionType == ConnectionType.Wifi) {
+                    return Text(
+                      'Wi-Fi',
+                      style: Theme.of(context).textTheme.headline3.copyWith(
+                        color: Colors.green,
+                      ),
+                    );
+                  } else if (state is InternetConnected &&
+                      state.connectionType == ConnectionType.Mobile) {
+                    return Text(
+                      'Mobile',
+                      style: Theme.of(context).textTheme.headline3.copyWith(
+                        color: Colors.red,
+                      ),
+                    );
+                  } else if (state is InternetDisconnected) {
+                    return Text(
+                      'Disconnected',
+                      style: Theme.of(context).textTheme.headline3.copyWith(
+                        color: Colors.grey,
+                      ),
+                    );
+                  }
+                  return CircularProgressIndicator();
+                },
+              ),
+              Divider(
+                height: 5,
+              ),
+              BlocConsumer<CounterCubit, CounterState>(
+                  listener: (context, state) {
+                    if (state.wasIncremented == true) {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Incremented!'),
+                          duration: Duration(milliseconds: 300),
+                        ),
+                      );
+                    } else if (state.wasIncremented == false) {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Decremented!'),
+                          duration: Duration(milliseconds: 300),
+                        ),
+                      );
+                    }
+                  }, builder: (context, state) {
+                return Text(
+                  state.counterValue.toString(),
+                  style: Theme.of(context).textTheme.headline4,
+                );
+                // SizedBox(
+                //   height: 24,
+                // ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //   children: [
+                //     FloatingActionButton(
+                //       heroTag: Text('${widget.title}'),
+                //       onPressed: () {
+                //         BlocProvider.of<CounterCubit>(context).decrement();
+                //         // context.bloc<CounterCubit>().decrement();
+                //       },
+                //       tooltip: 'Decrement',
+                //       child: Icon(Icons.remove),
+                //     ),
+                //     FloatingActionButton(
+                //       heroTag: Text('${widget.title} 2nd'),
+                //       onPressed: () {
+                //         // BlocProvider.of<CounterCubit>(context).increment();
+                //         context.bloc<CounterCubit>().increment();
+                //       },
+                //       tooltip: 'Increment',
+                //       child: Icon(Icons.add),
+                //     ),
+                //   ],
+                // ),
+              })
+            ],
+          ),
         ),
       ),
     );
