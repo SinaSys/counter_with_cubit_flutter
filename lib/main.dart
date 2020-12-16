@@ -69,10 +69,6 @@ class MyHomePage extends StatelessWidget {
                 return CircularProgressIndicator();
               },
             ),
-            SizedBox(height: 4,),
-            BlocBuilder<CounterCubit, CounterState>(builder: (context, state) {
-              return Text(state.counterValue.toString(),style: Theme.of(context).textTheme.headline2,);
-            })
           ],
         ),
       ),
